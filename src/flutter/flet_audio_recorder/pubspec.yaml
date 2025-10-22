@@ -13,11 +13,17 @@ dependencies:
     sdk: flutter
 
   collection: ^1.16.0
-  record: ^5.1.2
+  record: ^6.1.2
 
-  flet: ^0.25.2
+  flet: ^0.28.3
+  grpc: ^4.1.0
+  protobuf: ^4.2.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
+  protoc_plugin: ^22.5.0
+
+dependency_overrides:
+  record: ^6.1.2

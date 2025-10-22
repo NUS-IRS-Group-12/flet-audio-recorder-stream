@@ -5,7 +5,7 @@ description = ""
 readme = "README.md"
 requires-python = ">=3.8"
 dependencies = [
-  "flet-audio-recorder @ git+https://github.com/flet-dev/flet-audio-recorder.git",
+  "flet-audio-recorder",
   "flet>=0.25.2",
 ]
 
@@ -28,7 +28,17 @@ copyright = "Copyright (C) 2024 by Flet"
 [tool.flet.app]
 path = "src"
 
+[tool.flet.dev_packages]
+flet-audio-recorder = "../.." # relative path
+
 [tool.uv]
 dev-dependencies = [
     "flet[all]>=0.25.2",
 ]
+
+[tool.uv.sources]
+flet-audio-recorder = { path = "../../", editable = true }
+
+[tool.poetry.group.dev.dependencies]
+flet = {extras = ["all"], version = "0.28.3"}
+flet-audio-recorder = {path = "../../", develop = true}

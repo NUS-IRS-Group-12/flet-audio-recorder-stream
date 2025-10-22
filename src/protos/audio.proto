@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package audio;
+
+// Flutter → Python
+message ClientAudio {
+  bytes audio_chunk = 1;   // PCM 16-bit LE raw data
+  bool is_speaking = 2;    // true: transmitting, false: just silence or end
+}
+
+// Python → Flutter
+message ServerMessage {
+  string status = 1;       // e.g. "receiving", "idle"
+}
+
+service AudioStream {
+  // Bidirectional streaming for lowest latency
+  rpc StreamAudio(stream ClientAudio) returns (stream ServerMessage);
+}

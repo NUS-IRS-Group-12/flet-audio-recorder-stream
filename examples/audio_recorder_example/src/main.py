@@ -17,7 +17,7 @@ async def main(page: ft.Page):
         output_path = await audio_rec.stop_recording_async()
         print(f"StopRecording: {output_path}")
         if page.web and output_path is not None:
-            await page.launch_url_async(output_path)
+            page.launch_url(output_path)
 
     async def handle_list_devices(e):
         devices = await audio_rec.get_input_devices_async()
@@ -51,9 +51,9 @@ async def main(page: ft.Page):
         on_state_changed=handle_state_change,
     )
     page.overlay.append(audio_rec)
-    await page.update_async()
+    page.update()
 
-    await page.add_async(
+    page.add(
         ft.ElevatedButton("Start Audio Recorder", on_click=handle_start_recording),
         ft.ElevatedButton("Stop Audio Recorder", on_click=handle_stop_recording),
         ft.ElevatedButton("List Devices", on_click=handle_list_devices),

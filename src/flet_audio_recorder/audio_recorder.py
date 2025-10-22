@@ -9,6 +9,8 @@ from flet.core.ref import Ref
 from flet.core.types import OptionalEventCallable
 from flet.utils import deprecated
 
+# from .server import serve
+
 
 class AudioRecorderState(Enum):
     STOPPED = "stopped"
@@ -84,12 +86,12 @@ class AudioRecorder(Control):
     def start_recording(
         self, output_path: str = None, wait_timeout: Optional[float] = 10
     ) -> bool:
-        assert (
-            self.page.web or output_path
-        ), "output_path must be provided when not on web"
+        # assert (
+        #     self.page.web or output_path
+        # ), "output_path must be provided when not on web"
         started = self.invoke_method(
             "start_recording",
-            {"outputPath": output_path},
+            # {"outputPath": output_path},
             wait_for_result=True,
             wait_timeout=wait_timeout,
         )

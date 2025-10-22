@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flet/flet.dart';
+import 'package:flet_audio_recorder/src/services/audio_stream_client.dart';
 import 'package:flutter/widgets.dart';
 import 'package:record/record.dart';
 
@@ -27,10 +28,12 @@ class _AudioRecorderControlState extends State<AudioRecorderControl>
   AudioRecorder? recorder;
   void Function(RecordState)? _onStateChanged;
   StreamSubscription? _onStateChangedSubscription;
+  AudioGrpcClient? grpcClient;
 
   @override
   void initState() {
     debugPrint("AudioRecorder.initState($hashCode)");
+    grpcClient = AudioGrpcClient();
     recorder = widget.control.state["recorder"];
     if (recorder == null) {
       recorder = AudioRecorder();
@@ -76,8 +79,6 @@ class _AudioRecorderControlState extends State<AudioRecorderControl>
     bool autoGain = widget.control.attrBool("autoGain", false)!;
     bool cancelEcho = widget.control.attrBool("cancelEcho", false)!;
     bool suppressNoise = widget.control.attrBool("suppressNoise", false)!;
-    AudioEncoder audioEncoder =
-        parseAudioEncoder(widget.control.attrString("audioEncoder", "wav"))!;
 
     _onStateChanged = (state) {
       debugPrint("AudioRecorder($hashCode) - state_changed: ${state.name}");
@@ -98,21 +99,35 @@ class _AudioRecorderControlState extends State<AudioRecorderControl>
         switch (methodName) {
           case "start_recording":
             if (await recorder!.hasPermission()) {
-              if (args["outputPath"] != null) {
-                await recorder!.start(
-                    RecordConfig(
-                      encoder: audioEncoder,
-                      bitRate: bitRate,
-                      sampleRate: sampleRate,
-                      numChannels: numChannels,
-                      autoGain: autoGain,
-                      echoCancel: cancelEcho,
-                      noiseSuppress: suppressNoise,
-                    ),
-                    path: args["outputPath"]!);
-                return "true";
-              }
-              break;
+              debugPrint("Recorder permission check succeeded");
+              final audioStream = await recorder!.startStream(
+                RecordConfig(
+                  encoder: AudioEncoder.pcm16bits,
+                  bitRate: bitRate,
+                  sampleRate: sampleRate,
+                  numChannels: numChannels,
+                  autoGain: autoGain,
+                  echoCancel: cancelEcho,
+                  noiseSuppress: suppressNoise,
+                ),
+              );
+              debugPrint("Started recording audio stream");
+              // TODO
+              grpcClient?.connect(
+                host: "127.0.0.1",
+                port: 50351,
+              ).then((_) {
+                debugPrint("gRPC connected");
+              });
+              audioStream.listen((data) {
+                try {
+                  grpcClient!.sendAudioChunk(data);
+                  debugPrint("gRPC sent audio chunk: ${data.length} bytes");
+                } catch (e) {
+                  debugPrint("gRPC sendAudioChunk FAILED: $e");
+                }
+              });
+              return "true";
             }
             return null;
           case "stop_recording":
