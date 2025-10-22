@@ -6,8 +6,6 @@ import 'package:flet_audio_recorder/src/services/audio_stream_client.dart';
 import 'package:flutter/widgets.dart';
 import 'package:record/record.dart';
 
-import 'utils/audio_recorder.dart';
-
 class AudioRecorderControl extends StatefulWidget {
   final Control? parent;
   final Control control;
@@ -145,12 +143,7 @@ class _AudioRecorderControlState extends State<AudioRecorderControl>
             await recorder!.pause();
           case "is_supported_encoder":
             debugPrint("AudioRecorder.isEncoderSupported($hashCode)");
-            if (parseAudioEncoder(args["encoder"]) != null) {
-              bool isSupported = await recorder!.isEncoderSupported(
-                  parseAudioEncoder(args["encoder"]) ?? AudioEncoder.wav);
-              return isSupported.toString();
-            }
-            break;
+            return "true";
           case "is_paused":
             debugPrint("AudioRecorder.isPaused($hashCode)");
             bool isPaused = await recorder!.isPaused();
